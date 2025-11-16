@@ -3,16 +3,18 @@ from app.exceptions import (
     AlreadyExistsError,
     InvalidInputError
 )
+from app.db import get_db
+
 
 class ProductService:
-    def __init__(self, db):
-        self.db = db
 
-    def register(self, title, price):
+    @staticmethod
+    def register(title, price):
         if not title or not price:
             raise InvalidInputError("title", "price")
 
-        cursor = self.db.cursor()
+        db = get_db()
+        cursor = db.cursor()
 
         cursor.execute("SELECT * FROM products WHERE title = ?", (title, ))
         candidate = cursor.fetchone()
@@ -28,16 +30,18 @@ class ProductService:
         cursor.execute("SELECT * FROM products WHERE title = ?", (title, ))
         product = cursor.fetchone()
 
-        self.db.commit()
-        self.db.close()
+        db.commit()
+        db.close()
 
         return dict(product)
 
-    def update_product_title(self, product_id, new_title):
+    @staticmethod
+    def update_product_title(product_id, new_title):
         if not product_id or not new_title:
             raise InvalidInputError("product_id", "new_title")
 
-        cursor = self.db.cursor()
+        db = get_db()
+        cursor = db.cursor()
 
         cursor.execute("SELECT * FROM products WHERE id = ?", (product_id, ))
         candidate = cursor.fetchone()
@@ -53,8 +57,8 @@ class ProductService:
         cursor.execute("SELECT * FROM products WHERE id = ?", (product_id, ))
         updated_product = cursor.fetchone()
 
-        self.db.commit()
-        self.db.close()
+        db.commit()
+        db.close()
 
         return dict(updated_product)
 

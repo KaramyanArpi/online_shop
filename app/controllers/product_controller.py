@@ -1,22 +1,21 @@
 from flask import Blueprint, request, jsonify
 from app.services.product_service import ProductService
-from app.db import get_db
 from app.exceptions import (
     NotFoundError,
     AlreadyExistsError,
     InvalidInputError
 )
+
 class ProductController:
     def __init__(self):
-        self.db = get_db()
-        self.product_service = ProductService(self.db)
+        pass
 
     def register_product(self):
         data = request.get_json()
         title, price = data.get("title"), data.get("price")
 
         try:
-            new_product = self.product_service.register(title, price)
+            new_product = ProductService.register(title, price)
             return jsonify({"product": new_product}), 201
         except (NotFoundError, AlreadyExistsError, InvalidInputError) as e:
             return jsonify({"error": e.message}), e.status_code
@@ -27,7 +26,7 @@ class ProductController:
         new_title = request.get_json().get("new_title")
 
         try:
-            updated_product = self.product_service.update_product_title(product_id, new_title)
+            updated_product = ProductService.update_product_title(product_id, new_title)
             return jsonify({"updated_product": updated_product}), 201
         except (NotFoundError, AlreadyExistsError, InvalidInputError) as e:
             return jsonify({"error": e.message}), e.status_code

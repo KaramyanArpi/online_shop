@@ -3,17 +3,18 @@ from app.exceptions import (
     AlreadyExistsError,
     InvalidInputError
 )
+from app.db import get_db
 
 
 class UserService:
-    def __init__(self, db):
-        self.db = db
 
-    def register(self, username, age):
+    @staticmethod
+    def register(username, age):
         if not username or not age:
             raise InvalidInputError()
 
-        cursor = self.db.cursor()
+        db = get_db()
+        cursor = db.cursor()
 
         cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
         candidate = cursor.fetchone()
@@ -29,16 +30,18 @@ class UserService:
         cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
         user = cursor.fetchone()
 
-        self.db.commit()
-        self.db.close()
+        db.commit()
+        db.close()
 
         return dict(user)
 
-    def update_username(self, user_id, new_username):
+    @staticmethod
+    def update_username(user_id, new_username):
         if not user_id or not new_username:
             raise InvalidInputError("user_id", "new_username")
 
-        cursor = self.db.cursor()
+        db = get_db()
+        cursor = db.cursor()
 
         cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
         candidate = cursor.fetchone()
@@ -54,7 +57,7 @@ class UserService:
         cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
         updated_user = cursor.fetchone()
 
-        self.db.commit()
-        self.db.close()
+        db.commit()
+        db.close()
 
         return dict(updated_user)

@@ -10,15 +10,15 @@ from app.exceptions import (
 
 class UserController:
     def __init__(self):
-        self.db = get_db()
-        self.user_service = UserService(self.db)
+        pass
+
 
     def register_user(self):
         data = request.get_json()
         username, age = data.get("username"), data.get("age")
 
         try:
-            new_user = self.user_service.register(username, age)
+            new_user = UserService.register(username, age)
             return jsonify({"user": new_user}), 201
         except (NotFoundError, AlreadyExistsError, InvalidInputError) as e:
             return jsonify({"error": e.message}), e.status_code
@@ -29,7 +29,7 @@ class UserController:
         new_username = request.get_json().get("new_username")
 
         try:
-            updated_user = self.user_service.update_username(user_id, new_username)
+            updated_user = UserService.update_username(user_id, new_username)
             return jsonify({"updated_user": updated_user})
         except (NotFoundError, AlreadyExistsError, InvalidInputError) as e:
             return jsonify({"error": e.message}), e.status_code
