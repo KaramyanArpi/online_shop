@@ -34,7 +34,10 @@ class ProductService:
 
         for seller_id in sellers:
             print(seller_id)
-            cursor.execute("INSERT INTO seller_products (product_id, seller_id) VALUES (?, ?)", (product["id"], seller_id))
+            cursor.execute(
+                "INSERT INTO seller_products (product_id, seller_id) VALUES (?, ?)",
+                (product["id"], seller_id)
+            )
 
         db.commit()
         db.close()
@@ -70,5 +73,100 @@ class ProductService:
         db.close()
 
         return dict(updated_product)
+
+    @staticmethod
+    def delete_sellers_product(seller_id, product_id):
+        if not seller_id or not product_id:
+            raise InvalidInputError("seller_id", "product_id")
+
+        db = get_db()
+        cursor = db.cursor()
+
+        cursor.execute(
+            "SELECT * FROM seller_products WHERE seller_id = ? AND product_id = ?",
+            (seller_id, product_id)
+        )
+        candidate = cursor.fetchone()
+
+        if not candidate:
+            raise NotFoundError("Seller's product", "pair", (seller_id, product_id))
+
+        cursor.execute(
+            "DELETE FROM seller_products WHERE seller_id = ? AND product_id = ?",
+            (seller_id, product_id)
+        )
+
+        db.commit()
+        db.close()
+
+        return {
+            "msg": f"Seller's product ({seller_id}, {product_id}) deleted successfully."
+        }
+
+    @staticmethod
+    def get_sellers_products(seller_id, page, limit):
+        if not all([seller_id, page, limit]):
+            raise InvalidInputError("seller_id, page", "_limit")
+
+        try:
+            page = int(page)
+            limit = int(limit)
+        except ValueError:
+            raise InvalidInputError("page", "limit")
+
+        offset = (page - 1) * limit
+
+        db = get_db()
+        cursor = db.cursor()
+
+        cursor.execute(
+            "SELECT COUNT(*) FROM seller_products WHERE seller_id = ?",
+            (seller_id, )
+        )
+        total = cursor.fetchone()[0]
+
+        if total == 0:
+            raise NotFoundError("Seller's product", "pair", (seller_id, ))
+
+
+        rows = cursor.execute(
+            """
+            SELECT * FROM seller_products
+            WHERE seller_id = ? 
+            LIMIT ? OFFSET ?
+            """,
+            (seller_id, limit, offset)
+        ).fetchall()
+
+        db.close()
+
+        return {
+            "seller_id": seller_id,
+            "page": page,
+            "limit": limit,
+            "total": total,
+            "results": [dict(r) for r in rows]
+        }
+
+    @staticmethod
+    def get_product_by_id(product_id):
+        if not product_id:
+            raise InvalidInputError("product_id", "enough for it.")
+
+        db = get_db()
+        cursor = db.cursor()
+
+        cursor.execute("SELECT * FROM products WHERE id = ?", (product_id,))
+        product = cursor.fetchone()
+
+        if not product:
+            raise NotFoundError("Product", "id", product_id)
+        product = dict(product)
+
+
+        db.close()
+
+        return product
+
 
 

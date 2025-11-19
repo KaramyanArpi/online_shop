@@ -3,7 +3,6 @@ from app.exceptions import (
     AlreadyExistsError,
     InvalidInputError
 )
-
 from app.db import get_db
 
 class SellerService:
@@ -61,3 +60,66 @@ class SellerService:
         db.close()
 
         return dict(updated_seller)
+
+    @staticmethod
+    def delete_seller(seller_id):
+        if not seller_id:
+            raise InvalidInputError("name", "seller_id")
+
+        db = get_db()
+        cursor = db.cursor()
+
+        cursor.execute("SELECT * FROM sellers WHERE id = ?", (seller_id, ))
+        candidate = cursor.fetchone()
+
+        if not candidate:
+            raise NotFoundError("Seller", "id", seller_id)
+
+        cursor.execute("DELETE FROM sellers WHERE id = ?", (seller_id, ))
+        deleted_seller = cursor.fetchone()
+
+        db.commit()
+        db.close()
+
+        return dict(deleted_seller)
+
+    @staticmethod
+    def get_seller_by_id(seller_id):
+        if not seller_id:
+            raise InvalidInputError("seller_id", "enough for it.")
+
+        db = get_db()
+        cursor = db.cursor()
+
+        cursor.execute("SELECT * FROM sellers WHERE id = ?", (seller_id,))
+        seller = cursor.fetchone()
+
+        if not seller:
+            raise NotFoundError("User", "id", seller_id)
+
+        db.close()
+
+        return dict(seller)
+
+    @staticmethod
+    def get_sellers(limit, page):
+        try:
+            limit = int(limit)
+            page = int(page)
+        except ValueError:
+            raise InvalidInputError("_limit", "page")
+
+        offset = (page - 1) * limit
+
+        db = get_db()
+        cursor = db.cursor()
+
+        rows = cursor.execute(
+            "SELECT * FROM sellers LIMIT ? OFFSET ?",
+            (page, offset)
+        ).fetchall()
+
+        return [dict(row) for row in rows]
+
+
+
