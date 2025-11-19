@@ -5,7 +5,6 @@ from app.exceptions import (
 )
 from app.db import get_db
 
-
 class ProductService:
 
     @staticmethod
@@ -103,50 +102,56 @@ class ProductService:
             "msg": f"Seller's product ({seller_id}, {product_id}) deleted successfully."
         }
 
-    @staticmethod
-    def get_sellers_products(seller_id, page, limit):
-        if not all([seller_id, page, limit]):
-            raise InvalidInputError("seller_id, page", "_limit")
 
-        try:
-            page = int(page)
-            limit = int(limit)
-        except ValueError:
-            raise InvalidInputError("page", "limit")
+# API - Application Programming Interface
+# GET, PUT, POST, DELETE, PATCH, HEAD, OPTIONS
+# REST / RESTful API 1. JSON, 2. HTTP 3. Stateless
+# 200, 201, 400, 401, 403, 404, 500
+# SOAP
+    # @staticmethod
+    # def get_sellers_products(seller_id, page, limit):
+    #     if not all([seller_id, page, limit]):
+    #         raise InvalidInputError("seller_id, page", "_limit")
 
-        offset = (page - 1) * limit
+    #     try:
+    #         page = int(page)
+    #         limit = int(limit)
+    #     except ValueError:
+    #         raise InvalidInputError("page", "limit")
 
-        db = get_db()
-        cursor = db.cursor()
+    #     offset = (page - 1) * limit
 
-        cursor.execute(
-            "SELECT COUNT(*) FROM seller_products WHERE seller_id = ?",
-            (seller_id, )
-        )
-        total = cursor.fetchone()[0]
+    #     db = get_db()
+    #     cursor = db.cursor()
 
-        if total == 0:
-            raise NotFoundError("Seller's product", "pair", (seller_id, ))
+    #     cursor.execute(
+    #         "SELECT COUNT(*) FROM seller_products WHERE seller_id = ?",
+    #         (seller_id, )
+    #     )
+    #     total = cursor.fetchone()[0]
+
+    #     if total == 0:
+    #         raise NotFoundError("Seller's product", "pair", (seller_id, ))
 
 
-        rows = cursor.execute(
-            """
-            SELECT * FROM seller_products
-            WHERE seller_id = ? 
-            LIMIT ? OFFSET ?
-            """,
-            (seller_id, limit, offset)
-        ).fetchall()
+    #     rows = cursor.execute(
+    #         """
+    #         SELECT * FROM seller_products
+    #         WHERE seller_id = ? 
+    #         LIMIT ? OFFSET ?
+    #         """,
+    #         (seller_id, limit, offset)
+    #     ).fetchall()
 
-        db.close()
+    #     db.close()
 
-        return {
-            "seller_id": seller_id,
-            "page": page,
-            "limit": limit,
-            "total": total,
-            "results": [dict(r) for r in rows]
-        }
+    #     return {
+    #         "seller_id": seller_id,
+    #         "page": page,
+    #         "limit": limit,
+    #         "total": total,
+    #         "results": [dict(r) for r in rows]
+    #     }
 
     @staticmethod
     def get_product_by_id(product_id):

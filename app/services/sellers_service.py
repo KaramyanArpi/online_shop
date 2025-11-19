@@ -122,4 +122,24 @@ class SellerService:
         return [dict(row) for row in rows]
 
 
+    @staticmethod
+    def get_own_products(seller_id, limit, page):
+        if not seller_id or not limit or not page:
+            raise InvalidInputError("seller_id, limit", "page")
+        
+        db = get_db()
+        cursor = db.cursor()
 
+        cursor.execute("""
+            SELECT s.id AS seller_id, p.id AS id, p.title, p.price FROM
+            sellers AS s JOIN seller_products AS sp 
+            ON s.id = sp.seller_id
+            JOIN products AS p
+            ON p.id = sp.product_id
+            WHERE s.id = ?
+            LIMIT ?
+            OFFSET ?
+        """, (seller_id, limit, limit * (page - 1), ))
+
+        return [dict(x) for x in cursor.fetchall()]
+        

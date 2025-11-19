@@ -62,6 +62,16 @@ class SellerController:
             return jsonify({"error": e.message}), e.status_code
         except Exception as e:
             return jsonify({"error": f"Something went wrong. Please try again later. {e}"}), 500
+        
+    def get_own_products(self, seller_id):
+        limit, page = request.args.get("_limit"), request.args.get("page")
+        try:
+            products = SellerService.get_own_products(seller_id, int(limit), int(page))
+            return jsonify({"products": products})
+        except (NotFoundError, InvalidInputError) as e:
+            return jsonify({"error": e.message}), e.status_code
+        except Exception as e:
+            return jsonify({"error": f"Something went wrong. {e}"}), 500
 
 
 sellers_bp = Blueprint("sellers", __name__)
@@ -72,3 +82,4 @@ sellers_bp.add_url_rule("/<int:seller_id>/update", view_func=sel_controller.upda
 sellers_bp.add_url_rule("/<int:seller_id>/delete", view_func=sel_controller.delete_seller, methods=["DELETE"])
 sellers_bp.add_url_rule("/<int:seller_id>", view_func=sel_controller.get_seller_by_id, methods=["GET"])
 sellers_bp.add_url_rule("/", view_func=sel_controller.get_sellers, methods=["GET"])
+sellers_bp.add_url_rule("/<int:seller_id>/products", view_func=sel_controller.get_own_products, methods=["GET"])

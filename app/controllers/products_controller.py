@@ -42,17 +42,17 @@ class ProductController:
         except Exception as e:
             return jsonify({"error": f"Something went wrong. {e}"}), 500
 
-    def get_sellers_products(self, seller_id):
-        page = request.args.get("page")
-        limit = request.args.get("_limit")
+    # def get_sellers_products(self, seller_id):
+    #     page = request.args.get("page")
+    #     limit = request.args.get("_limit")
 
-        try:
-            result = ProductService.get_sellers_products(seller_id, page, limit)
-            return jsonify(result)
-        except (NotFoundError, InvalidInputError) as e:
-            return jsonify({"error": e.message}), e.status_code
-        except Exception as e:
-            return jsonify({"error": f"Something went wrong. {e}"}), 500
+    #     try:
+    #         result = ProductService.get_sellers_products(seller_id, page, limit)
+    #         return jsonify(result)
+    #     except (NotFoundError, InvalidInputError) as e:
+    #         return jsonify({"error": e.message}), e.status_code
+    #     except Exception as e:
+    #         return jsonify({"error": f"Something went wrong. {e}"}), 500
 
     def get_product_by_id(self, product_id):
         try:
@@ -70,7 +70,7 @@ pr_controller = ProductController()
 products_bp.add_url_rule("/register", view_func=pr_controller.register_product, methods=["POST"])
 products_bp.add_url_rule("/<int:product_id>/update", view_func=pr_controller.update_product, methods=["PUT"])
 products_bp.add_url_rule("/<int:seller_id>/<int:product_id>/delete", view_func=pr_controller.delete_product, methods=["DELETE"])
-products_bp.add_url_rule("/<int:seller_id>", view_func=pr_controller.get_sellers_products, methods=["GET"])
-products_bp.add_url_rule("/<product_id>", view_func=pr_controller.get_product_by_id, methods=["GET"])
+# products_bp.add_url_rule("/<int:seller_id>", view_func=pr_controller.get_sellers_products, methods=["GET"])
+products_bp.add_url_rule("/<int:product_id>", view_func=pr_controller.get_product_by_id, methods=["GET"])
 
 
